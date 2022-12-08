@@ -38,21 +38,20 @@ class SendTestRequest extends Command
         }
 
         if ($mode === 'once') {
-            $this->runRequestOnce($url);
+            return $this->runRequestOnce($url);
         } else if ($mode === 'multiple') {
-            $this->runRequestMultiple($url);
+            return $this->runRequestMultiple($url);
         }
-
-        return Command::SUCCESS;
     }
 
     /**
      * Run a single request to specified url
+     * This process handle question 4
      *
      * @param string $url
-     * @return int|void
+     * @return int
      */
-    public function runRequestOnce(string $url)
+    public function runRequestOnce(string $url): int
     {
         try {
             // we can retry two times and wait 50 miliseconds between each request
@@ -72,6 +71,7 @@ class SendTestRequest extends Command
 
         if ($response->successful()) {
             $this->info('Single request successful');
+            return Command::SUCCESS;
         } else {
             $this->warn('Single request failed');
 
@@ -88,11 +88,12 @@ class SendTestRequest extends Command
 
     /**
      * Run multiple requests to specified url
+     * This process handle question 5
      *
      * @param string $url
-     * @return void
+     * @return int
      */
-    public function runRequestMultiple(string $url)
+    public function runRequestMultiple(string $url): int
     {
         // we can run up to n number, testing with 100 for testing purposes
         $totalRequestsToRun = 100;
@@ -116,7 +117,13 @@ class SendTestRequest extends Command
         }
 
         $this->info('Successful responses: ' . count($successfulResponses));
-        $this->info('Failed responses: ' . count($failedResponses));
+        $this->warn('Failed responses: ' . count($failedResponses));
+
+        if (count($successfulResponses) > 0) {
+            return Command::SUCCESS;
+        }
+
+        return Command::INVALID;
 
         /**
          * @todo
